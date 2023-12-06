@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
+import {firebase} from '@react-native-firebase/firestore';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -13,10 +14,38 @@ import {
   StyleSheet,
   Image,
   ImageBackground,
-  TextInput
+  TextInput,
+  Keyboard
 } from 'react-native';
-
+import { TouchableOpacity } from 'react-native-gesture-handler';
 const AddTransaction = () =>{
+  const databaseConnection = firebase.firestore().collection('Transaction')
+  const navigation = useNavigation();
+  const handleNavButtonClick = (screenName) => {
+    navigation.navigate(screenName);
+  };
+
+  const [transactionDetail, setTransactionDetail] = useState('')
+  const [amount, setAmount] = useState('')
+
+  const setTransaction = () =>{
+    console.log("Entered the setTransaction function..")
+      const data = {
+          TransactionDetail: transactionDetail,
+          Amount:amount
+      };
+
+      databaseConnection
+      .add(data)
+      .then(()=>{
+        setAmount('');
+        setTransactionDetail('');
+      
+        Keyboard.dismiss();
+    })
+
+  }
+
     return(
         <View style={styles.addTransationContainer}>
         
@@ -39,6 +68,8 @@ const AddTransaction = () =>{
                 style={styles.inputTransactionDetail}
                 placeholder="Enter transaction detail"
                 keyboardType="default"
+                onChangeText={text=>setTransactionDetail(text)}
+                value={transactionDetail}
                 
               />
         </View>
@@ -48,10 +79,12 @@ const AddTransaction = () =>{
                 style={styles.inputTransactionAmount}
                 placeholder="Enter transaction amount"
                 keyboardType="default"
+                onChangeText={text=>setAmount(text)}
+                value={amount}
                 
               />
         </View>
-        <Pressable style={styles.submitButton} >
+        <Pressable style={styles.submitButton} onPress={setTransaction}>
               <Text style={styles.submitButtonText}>Submit</Text>
             </Pressable>
       </View>
@@ -64,35 +97,51 @@ const AddTransaction = () =>{
       </View>
       </View>
 
-  <ImageBackground    
+      <ImageBackground    
         source={require('../assets/images/Navbar.png')} // Update the path to your image
         style={styles.footerNavbar}
         resizeMode="cover" // You can change the resizeMode as needed
       >
+
+      <TouchableOpacity onPress={() => handleNavButtonClick('HomePage')}>
         <View style={styles.NavLink}>
+        
         <Image
-            source={require('../assets/images/HomeIconActive.png')} // Update the path to your image
+            source={require('../assets/images/HomeIconInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity onPress={() => handleNavButtonClick('PastTransactions')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/AnalysisInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+
+        
+        <TouchableOpacity onPress={() => handleNavButtonClick('AddBudget')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/WalletInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/UserProfileInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
 
     </ImageBackground>
       </View>

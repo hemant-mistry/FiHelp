@@ -1,10 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {View, Text, StyleSheet, Image, ImageBackground} from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
+import { firebase } from '@react-native-firebase/firestore';
 
 const HomePage = () => {
-  const percentage = 30;
+  const navigation = useNavigation();
+  const percentage = 40;
   // Calculate the dynamic width of the progress bar
   const progressBarWidth = `${percentage}%`;
+
+  const [budgetData, setBudgetData] = useState([]);
+  const handleNavButtonClick = (screenName) => {
+    navigation.navigate(screenName);
+  };
+
+  useEffect(()=>{
+    console.log(budgetData)
+    const fetchData = async () =>{
+      
+      try{
+        const snapshot = await firebase.firestore().collection('Budget').get();
+        const data =  snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
+        setBudgetData(data);
+        
+        
+      } catch(error){
+        console.error('Error fetching data from Firestore:',error)
+      }
+    }
+    fetchData();
+  }, []);
   return (
     <View style={styles.HomePageContainer}>
       <View style={styles.HeadingContainer}>
@@ -32,8 +58,8 @@ const HomePage = () => {
       <View style={styles.BudgetContentContainer}>
         <View style={styles.BudgetBalCard}>
           <View style={styles.BudgetHeaderContainer}>
-            <Text style={styles.BudgetBalHeader}>Budget for October</Text>
-            <Text style={styles.BudgetBalAmount}>₹3,578</Text>
+          <Text style={styles.BudgetBalHeader}>Budget for {budgetData.length > 0 ? budgetData[0].Month : ''}</Text>
+          <Text style={styles.BudgetBalAmount}>₹ {budgetData.length > 0 ? budgetData[0].BudgetAmount : ''}</Text>
           </View>
           <View style={styles.ProgressBarContainer}>
             <View
@@ -47,12 +73,13 @@ const HomePage = () => {
       </View>
 
       {/* Add new transactions UI */}
+      <TouchableOpacity onPress={() => handleNavButtonClick('AddTransaction')}>
       <View style={styles.addTransactionContainer}>
       <View style={styles.addTransaction}>
       <Text style={styles.addTransactionText}>+</Text>
       </View>
       </View>
-
+      </TouchableOpacity>
 
       {/*Footer navbar UI*/}
    
@@ -61,30 +88,46 @@ const HomePage = () => {
         style={styles.footerNavbar}
         resizeMode="cover" // You can change the resizeMode as needed
       >
+
+      <TouchableOpacity onPress={() => handleNavButtonClick('HomePage')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/HomeIconActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity onPress={() => handleNavButtonClick('PastTransactions')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/AnalysisInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+
+        
+        <TouchableOpacity onPress={() => handleNavButtonClick('AddBudget')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/WalletInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/UserProfileInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
 
     </ImageBackground>
 

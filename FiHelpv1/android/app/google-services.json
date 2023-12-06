@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "742598660726",
+    "project_id": "fihelpv1",
+    "storage_bucket": "fihelpv1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:742598660726:android:48091df723217469bb0557",
+        "android_client_info": {
+          "package_name": "com.fihelpv1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJDHW_5PKz4PjKgQVL3aNVQLfKU6M975c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

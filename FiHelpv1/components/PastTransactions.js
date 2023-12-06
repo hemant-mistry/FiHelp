@@ -1,4 +1,5 @@
-import {useNavigation} from '@react-navigation/native';
+import { firebase } from '@react-native-firebase/firestore';
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -14,8 +15,33 @@ import {
   Image,
   ImageBackground
 } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const PastTransactions = () => {
+  const navigation = useNavigation();
+  const [transactionDetails, setTransactionDetails] = useState([])
+  const handleNavButtonClick = (screenName) => {
+    navigation.navigate(screenName);
+  };
+
+
+  useEffect(()=>{
+    console.log(transactionDetails);
+
+    const fetchTransactionDetails = async () =>{
+      try{
+        const snapshot = await firebase.firestore().collection('Transaction').get();
+        const data =  snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
+        setTransactionDetails(data)
+      }
+      catch(error){
+        console.error('Error fetching data from Firestore:',error)
+      }
+    }
+
+    fetchTransactionDetails();
+  }, )
+
   return (
     <View style={styles.PastTransactionContainer}>
     <ScrollView style={styles.PastTransactionContainer}>
@@ -32,116 +58,74 @@ const PastTransactions = () => {
       <Text style={styles.AppSubtitle}>Past Transactions</Text>
 
     {/* Past transactions card*/}
-      <View style={styles.PastTransactionsContainer}>
-        <View style={styles.PastTransactionsCard}>
-          <Text style={styles.PastTransactionCardTitle}>
-            Transaction Detail:
-          </Text>
-          <Text style={styles.PastTransactionCardDesc}>
-            Weekend Burger King order
-          </Text>
-          <Text style={styles.PastTransactionCardAmount}>₹4365</Text>
-        </View>
-      </View>
+    {transactionDetails.map((transaction, index) => (
+          <View key={index} style={styles.PastTransactionsContainer}>
+            <View style={styles.PastTransactionsCard}>
+              <Text style={styles.PastTransactionCardTitle}>Transaction Detail:</Text>
+              <Text style={styles.PastTransactionCardDesc}>{transaction.TransactionDetail}</Text>
+              <Text style={styles.PastTransactionCardAmount}>₹{transaction.Amount}</Text>
+            </View>
+          </View>
+        ))}
 
-      <View style={styles.PastTransactionsContainer}>
-        <View style={styles.PastTransactionsCard}>
-          <Text style={styles.PastTransactionCardTitle}>
-            Transaction Detail:
-          </Text>
-          <Text style={styles.PastTransactionCardDesc}>
-            Weekend Burger King order
-          </Text>
-          <Text style={styles.PastTransactionCardAmount}>₹4365</Text>
-        </View>
-      </View>
-
-      <View style={styles.PastTransactionsContainer}>
-        <View style={styles.PastTransactionsCard}>
-          <Text style={styles.PastTransactionCardTitle}>
-            Transaction Detail:
-          </Text>
-          <Text style={styles.PastTransactionCardDesc}>
-            Weekend Burger King order
-          </Text>
-          <Text style={styles.PastTransactionCardAmount}>₹4365</Text>
-        </View>
-      </View>
-
-      <View style={styles.PastTransactionsContainer}>
-        <View style={styles.PastTransactionsCard}>
-          <Text style={styles.PastTransactionCardTitle}>
-            Transaction Detail:
-          </Text>
-          <Text style={styles.PastTransactionCardDesc}>
-            Weekend Burger King order
-          </Text>
-          <Text style={styles.PastTransactionCardAmount}>₹4365</Text>
-        </View>
-      </View>
-
-      <View style={styles.PastTransactionsContainer}>
-        <View style={styles.PastTransactionsCard}>
-          <Text style={styles.PastTransactionCardTitle}>
-            Transaction Detail:
-          </Text>
-          <Text style={styles.PastTransactionCardDesc}>
-            Weekend Burger King order
-          </Text>
-          <Text style={styles.PastTransactionCardAmount}>₹4365</Text>
-        </View>
-      </View>
-
-      <View style={styles.PastTransactionsContainer}>
-        <View style={styles.PastTransactionsCard}>
-          <Text style={styles.PastTransactionCardTitle}>
-            Transaction Detail:
-          </Text>
-          <Text style={styles.PastTransactionCardDesc}>
-            Weekend Burger King order
-          </Text>
-          <Text style={styles.PastTransactionCardAmount}>₹4365</Text>
-        </View>
-      </View>
+      
 
     
     </ScrollView>
 
      {/* Add new transactions UI */}
-     <View style={styles.addTransactionContainer}>
+     <TouchableOpacity onPress={() => handleNavButtonClick('AddTransaction')}>
+      <View style={styles.addTransactionContainer}>
       <View style={styles.addTransaction}>
       <Text style={styles.addTransactionText}>+</Text>
       </View>
       </View>
-    <ImageBackground    
+      </TouchableOpacity>
+      <ImageBackground    
         source={require('../assets/images/Navbar.png')} // Update the path to your image
         style={styles.footerNavbar}
         resizeMode="cover" // You can change the resizeMode as needed
       >
+
+      <TouchableOpacity onPress={() => handleNavButtonClick('HomePage')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/HomeIconInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity onPress={() => handleNavButtonClick('PastTransactions')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/AnalysisActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+
+        
+        <TouchableOpacity onPress={() => handleNavButtonClick('AddBudget')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/WalletInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/UserProfileInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
 
     </ImageBackground>
     </View>

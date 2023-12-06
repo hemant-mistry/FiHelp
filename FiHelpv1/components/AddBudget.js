@@ -13,10 +13,39 @@ import {
   StyleSheet,
   Image,
   ImageBackground,
-  TextInput
+  TextInput,
+  Keyboard
 } from 'react-native';
-
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import {firebase} from '@react-native-firebase/firestore';
+import { keyboard } from '@testing-library/user-event/dist/keyboard';
 const AddBudget = () =>{
+  const databaseConnection = firebase.firestore().collection('Budget')
+  const [month, setMonth] = useState('');
+  const [budgetamount, setBudgetamount] = useState('')
+  const navigation = useNavigation();
+
+  const handleNavButtonClick = (screenName) => {
+    navigation.navigate(screenName);
+  };
+
+  const setMonthlyBudget = () =>{
+    console.log("Inside the setMonthlyBudget function");
+    const data = {
+      BudgetAmount: budgetamount,
+      Month:month,
+    };
+
+    databaseConnection
+    .add(data)
+    .then(()=>{
+      setBudgetamount('');
+      setMonth('');
+
+      Keyboard.dismiss();
+    })
+  }
+
     return(
         <View style={styles.addTransationContainer}>
         
@@ -34,65 +63,86 @@ const AddBudget = () =>{
 <View style={styles.AddTransactionsContainer}>
       <View style={styles.AddTransactionForm}>
         <View style={styles.AddTransactionDetail}>
-            <Text style={styles.DetailText}>Transaction Detail:</Text>
+            <Text style={styles.DetailText}>Enter your Budget month:</Text>
             <TextInput
                 style={styles.inputTransactionDetail}
-                placeholder="Enter transaction detail"
+                placeholder="Enter your budget month"
                 keyboardType="default"
+                onChangeText={text=>setMonth(text)}
+                value={month}
                 
               />
         </View>
         <View style={styles.AddTransactionAmount}>
-        <Text style={styles.AmountText}>Transaction Amount:</Text>
+        <Text style={styles.AmountText}>Budget Amount:</Text>
         <TextInput
                 style={styles.inputTransactionAmount}
-                placeholder="Enter transaction amount"
+                placeholder="Enter budget amount"
                 keyboardType="default"
-                
+                onChangeText={text =>setBudgetamount(text)}
+                value={budgetamount}
               />
         </View>
-        <Pressable style={styles.submitButton} >
+        <Pressable style={styles.submitButton} onPress={setMonthlyBudget}>
               <Text style={styles.submitButtonText}>Submit</Text>
             </Pressable>
       </View>
       </View>
   {/*Footer navbar UI*/}
     {/* Add new transactions UI */}
-    <View style={styles.addTransactionContainer}>
+    <TouchableOpacity onPress={() => handleNavButtonClick('AddTransaction')}>
+      <View style={styles.addTransactionContainer}>
       <View style={styles.addTransaction}>
       <Text style={styles.addTransactionText}>+</Text>
       </View>
       </View>
+      </TouchableOpacity>
 
-  <ImageBackground    
+      <ImageBackground    
         source={require('../assets/images/Navbar.png')} // Update the path to your image
         style={styles.footerNavbar}
         resizeMode="cover" // You can change the resizeMode as needed
       >
+
+      <TouchableOpacity onPress={() => handleNavButtonClick('HomePage')}>
         <View style={styles.NavLink}>
+        
         <Image
-            source={require('../assets/images/HomeIconActive.png')} // Update the path to your image
+            source={require('../assets/images/HomeIconInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity onPress={() => handleNavButtonClick('PastTransactions')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/AnalysisInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+
+        
+        <TouchableOpacity onPress={() => handleNavButtonClick('AddBudget')}>
         <View style={styles.NavLink}>
+        
         <Image
-            source={require('../assets/images/WalletInActive.png')} // Update the path to your image
+            source={require('../assets/images/WalletActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
         <View style={styles.NavLink}>
+        
         <Image
             source={require('../assets/images/UserProfileInActive.png')} // Update the path to your image
             style={styles.NavLinkIcon}
           />
         </View>
+        </TouchableOpacity>
 
     </ImageBackground>
       </View>

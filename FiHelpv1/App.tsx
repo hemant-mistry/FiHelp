@@ -20,7 +20,7 @@ const App = () => {
     <View style={{ flex: 1, backgroundColor: "#1E1E1E" }}>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="AddBudget"
+          initialRouteName="HomePage"
           screenOptions={{
             headerStyle: {
               backgroundColor: "#1E1E1E",
