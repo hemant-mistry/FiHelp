@@ -1,5 +1,5 @@
 import { firebase } from '@react-native-firebase/firestore';
-import {useIsFocused, useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useIsFocused, useNavigation} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
@@ -25,7 +25,7 @@ const PastTransactions = () => {
   };
 
 
-  useEffect(()=>{
+  useFocusEffect(()=>{
     console.log(transactionDetails);
 
     const fetchTransactionDetails = async () =>{

@@ -23,6 +23,10 @@ const AddBudget = () =>{
   const databaseConnection = firebase.firestore().collection('Budget')
   const [month, setMonth] = useState('');
   const [budgetamount, setBudgetamount] = useState('')
+
+  //State to keep track of whether the budget amount is fetched
+  const [budgetFetched, setBudgetFetched] = useState(false);
+
   const navigation = useNavigation();
 
   const handleNavButtonClick = (screenName) => {
@@ -36,15 +40,64 @@ const AddBudget = () =>{
       Month:month,
     };
 
-    databaseConnection
-    .add(data)
-    .then(()=>{
-      setBudgetamount('');
-      setMonth('');
+    // Check if a budget entry for the current month already exists
+  databaseConnection
+  .where('Month', '==', month)
+  .get()
+  .then((querySnapshot) => {
+    if (querySnapshot.size > 0) {
+      // Update the existing entry
+      querySnapshot.forEach((doc) => {
+        databaseConnection.doc(doc.id).update(data);
+      });
+    } else {
+      // Add a new entry
+      databaseConnection.add(data);
+    }
 
-      Keyboard.dismiss();
-    })
-  }
+    
+    
+    Keyboard.dismiss();
+  })
+  .catch((error) => {
+    console.error("Error checking/updating budget:", error);
+  });
+};
+
+   // New useEffect hook to set the default month
+   useEffect(() => {
+    const currentDate = new Date();
+    const defaultMonth = currentDate.toLocaleString('default', { month: 'long' });
+    setMonth(defaultMonth);
+  }, []); // Empty dependency array ensures that this effect runs only once, similar to componentDidMount
+
+
+  //For fetching the existing data from the database
+  useEffect(() => {
+    // Fetch existing budget amount when the component mounts
+    const fetchBudgetAmount = async () => {
+      try {
+        const snapshot = await databaseConnection.where('Month', '==', month).get();
+
+        if (snapshot.size > 0) {
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            setBudgetamount(data.BudgetAmount);
+          });
+        }
+
+        // Mark that the budget amount has been fetched
+        setBudgetFetched(true);
+      } catch (error) {
+        console.error('Error fetching budget amount:', error);
+      }
+    };
+
+    // Call the function to fetch the budget amount
+    fetchBudgetAmount();
+  }, [month]); // Fetch the budget amount whenever the month changes
+
+
 
     return(
         <View style={styles.addTransationContainer}>
@@ -70,7 +123,8 @@ const AddBudget = () =>{
                 keyboardType="default"
                 onChangeText={text=>setMonth(text)}
                 value={month}
-                
+                editable={false}
+                defaultValue={month}
               />
         </View>
         <View style={styles.AddTransactionAmount}>
@@ -81,6 +135,7 @@ const AddBudget = () =>{
                 keyboardType="default"
                 onChangeText={text =>setBudgetamount(text)}
                 value={budgetamount}
+                editable={budgetFetched} //Allow editing only if the budget amount is fetched
               />
         </View>
         <Pressable style={styles.submitButton} onPress={setMonthlyBudget}>

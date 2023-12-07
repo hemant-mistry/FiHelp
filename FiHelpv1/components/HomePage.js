@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {View, Text, StyleSheet, Image, ImageBackground} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { firebase } from '@react-native-firebase/firestore';
 
 const HomePage = () => {
@@ -9,14 +9,14 @@ const HomePage = () => {
   const percentage = 40;
   // Calculate the dynamic width of the progress bar
   const progressBarWidth = `${percentage}%`;
-
+  const [availableBalance, setAvailableBalance] = useState('');
   const [budgetData, setBudgetData] = useState([]);
   const handleNavButtonClick = (screenName) => {
     navigation.navigate(screenName);
   };
 
-  useEffect(()=>{
-    console.log(budgetData)
+  useFocusEffect(()=>{
+    
     const fetchData = async () =>{
       
       try{
@@ -29,8 +29,40 @@ const HomePage = () => {
         console.error('Error fetching data from Firestore:',error)
       }
     }
+
+
+    const fetchTransactionData = async (budgetData) =>{
+      try{
+        const snapshot = await firebase.firestore().collection('Transaction').get();
+        const data = snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
+
+        //Extract the "Amount" values from the array and convert them to numbers
+        const amounts = data.map((transaction)=>parseFloat(transaction.Amount) || 0);
+        
+
+        //Sum of the total past transactions
+        const totalAmount = amounts.reduce((sum,amount)=> sum+amount,0);
+
+        console.log("Budget",budgetData.BudgetAmount)
+        setAvailableBalance(parseFloat(budgetData.BudgetAmount)-totalAmount)
+
+        
+
+       
+      }
+      catch(error){
+        console.error('Error fetching Transaction data from Firestore:',error)
+      }
+    }
+
+    
+    
     fetchData();
-  }, []);
+    fetchTransactionData(budgetData);
+  },);
+
+
+
   return (
     <View style={styles.HomePageContainer}>
       <View style={styles.HeadingContainer}>
@@ -51,7 +83,7 @@ const HomePage = () => {
       <View style={styles.AvailBalContainer}>
         <View style={styles.AvailBalCard}>
           <Text style={styles.AvailBalHeader}>Available balance</Text>
-          <Text style={styles.AvailBalAmount}>₹3,578</Text>
+          <Text style={styles.AvailBalAmount}>₹{availableBalance}</Text>
           <Text style={styles.AvailBalSeeDetails}>See details</Text>
         </View>
       </View>
