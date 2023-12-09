@@ -6,59 +6,65 @@ import { firebase } from '@react-native-firebase/firestore';
 
 const HomePage = () => {
   const navigation = useNavigation();
-  const percentage = 40;
+  
+  const [percentage, setPrecentage] = useState(0);
   // Calculate the dynamic width of the progress bar
   const progressBarWidth = `${percentage}%`;
   const [availableBalance, setAvailableBalance] = useState('');
   const [budgetData, setBudgetData] = useState([]);
+ 
+
+
   const handleNavButtonClick = (screenName) => {
     navigation.navigate(screenName);
   };
 
-  useFocusEffect(()=>{
+  const calPercentage = (budgetData, availableBalance) => {
+    const percentage = ((availableBalance) / parseFloat(budgetData[0].BudgetAmount)) * 100;
+    setPrecentage(100-percentage); 
     
-    const fetchData = async () =>{
+  }
+
+  
+
+  const fetchTransactionData = async (budgetData) =>{
+    try{
+      const snapshot = await firebase.firestore().collection('Transaction').get();
+      const data = snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
+
+      //Extract the "Amount" values from the array and convert them to numbers
+      const amounts = data.map((transaction)=>parseFloat(transaction.Amount) || 0);
       
-      try{
-        const snapshot = await firebase.firestore().collection('Budget').get();
-        const data =  snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
-        setBudgetData(data);
-        
-        
-      } catch(error){
-        console.error('Error fetching data from Firestore:',error)
-      }
+
+      //Sum of the total past transactions
+      const totalAmount = amounts.reduce((sum,amount)=> sum+amount,0);
+
+      console.log("Budget",budgetData.BudgetAmount)
+      setAvailableBalance(parseFloat(budgetData[0].BudgetAmount)-totalAmount)
     }
-
-
-    const fetchTransactionData = async (budgetData) =>{
-      try{
-        const snapshot = await firebase.firestore().collection('Transaction').get();
-        const data = snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
-
-        //Extract the "Amount" values from the array and convert them to numbers
-        const amounts = data.map((transaction)=>parseFloat(transaction.Amount) || 0);
-        
-
-        //Sum of the total past transactions
-        const totalAmount = amounts.reduce((sum,amount)=> sum+amount,0);
-
-        console.log("Budget",budgetData.BudgetAmount)
-        setAvailableBalance(parseFloat(budgetData.BudgetAmount)-totalAmount)
-
-        
-
-       
-      }
-      catch(error){
-        console.error('Error fetching Transaction data from Firestore:',error)
-      }
+    catch(error){
+      console.error('Error fetching Transaction data from Firestore:',error)
     }
+  }
+  const fetchData = async () =>{
+      
+    try{
+      const snapshot = await firebase.firestore().collection('Budget').get();
+      const data =  snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
+      setBudgetData(data);
+      console.log(data)
+      
+      fetchTransactionData(data);
+      calPercentage(data,availableBalance) 
+    } catch(error){
+      console.error('Error fetching data from Firestore:',error)
+    }
+  }
 
-    
-    
+
+  
+  useFocusEffect(()=>{    
     fetchData();
-    fetchTransactionData(budgetData);
   },);
 
 
