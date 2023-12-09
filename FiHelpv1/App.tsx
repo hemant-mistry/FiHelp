@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomePage from "./components/HomePage";
@@ -9,12 +9,44 @@ import {
 import addTransaction from "./components/AddTransaction";
 import PastTransactions from "./components/PastTransactions";
 import AddBudget from "./components/AddBudget";
+import LottieView from "lottie-react-native";
 
 const Stack = createStackNavigator();
 
+const LoadingScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "#000000" }}>
+    <LottieView
+    style={{
+      width:400,
+      height:400
+    }}
+      source={require('./assets/animations/FiHelpStartScreenAnimation.json')}
+      autoPlay
+      loop
+    />
+  </View>
+);
+
 const App = () => {
-  StatusBar.setBarStyle("light-content")
-  StatusBar.setBackgroundColor("black")
+  const [isLoading, setIsLoading] = useState(true);
+  StatusBar.setBarStyle("light-content");
+  StatusBar.setBackgroundColor("black");
+
+  useEffect(() => {
+    const loadData = async () => {
+      // Simulate loading data
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+    };
+
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    console.log("splash")
+    return <LoadingScreen />;
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: "#1E1E1E" }}>
@@ -37,12 +69,12 @@ const App = () => {
             options={{ headerTitle: "Home", headerShown: false }}
           />
 
-<Stack.Screen
+          <Stack.Screen
             name="AddBudget"
             component={AddBudget}
             options={{ headerTitle: "AddBudget", headerShown: false }}
           />
-          
+
           <Stack.Screen
             name="PastTransactions"
             component={PastTransactions}

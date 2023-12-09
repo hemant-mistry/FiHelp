@@ -13,17 +13,50 @@ import {
   Pressable,
   StyleSheet,
   Image,
-  ImageBackground
+  ImageBackground,
+  Button
 } from 'react-native';
+
+import LottieView from "lottie-react-native";
 import { TouchableOpacity } from 'react-native-gesture-handler';
+
+const LoadingScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "#000000" }}>
+    <LottieView
+    style={{
+      width:200,
+      height:200
+    }}
+      source={require('../assets/animations/LoadingAnimation.json')}
+      autoPlay
+      loop
+    />
+  </View>
+);
+
+
 
 const PastTransactions = () => {
   const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(true);
   const [transactionDetails, setTransactionDetails] = useState([])
   const handleNavButtonClick = (screenName) => {
     navigation.navigate(screenName);
   };
 
+
+  useEffect(() => {
+    const loadData = async () => {
+      // Simulate loading data
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
+    };
+
+    loadData();
+  }, []);
+
+ 
 
   useFocusEffect(()=>{
     console.log(transactionDetails);
@@ -41,6 +74,11 @@ const PastTransactions = () => {
 
     fetchTransactionDetails();
   }, )
+
+  if (isLoading) {
+    console.log("splash")
+    return <LoadingScreen />;
+  }
 
   return (
     <View style={styles.PastTransactionContainer}>
@@ -61,9 +99,18 @@ const PastTransactions = () => {
     {transactionDetails.map((transaction, index) => (
           <View key={index} style={styles.PastTransactionsContainer}>
             <View style={styles.PastTransactionsCard}>
+            <View style={styles.deleteButtonContainer}>
+                <TouchableOpacity onPress={() => handleDeleteTransaction(transaction.id)}>
+                  <Image
+                    source={require('../assets/images/DeleteIcon.png')} // Update the path to your image
+                    style={styles.deleteButtonIcon}
+                  />
+                </TouchableOpacity>
+              </View>
               <Text style={styles.PastTransactionCardTitle}>Transaction Detail:</Text>
               <Text style={styles.PastTransactionCardDesc}>{transaction.TransactionDetail}</Text>
               <Text style={styles.PastTransactionCardAmount}>₹{transaction.Amount}</Text>
+             
             </View>
           </View>
         ))}
@@ -222,7 +269,17 @@ const styles = StyleSheet.create({
   },
   NavLinkIcon:{
     height:24
-  }
+  },
+  deleteButtonContainer: {
+    position: 'absolute',
+    top: 20, // Adjust the top position as needed
+    right: 10, // Adjust the right position as needed
+  },
+  deleteButtonIcon: {
+    width: 14, // Adjust the width as needed
+    height: 14, // Adjust the height as needed
+    tintColor: 'red', // Adjust the color as needed
+  },
 });
 
 export default PastTransactions;

@@ -4803,6 +4803,16 @@
   dependencies:
     "js-tokens" "^3.0.0 || ^4.0.0"
 
+"lottie-react-native@^6.4.1":
+  "integrity" "sha512-DPsUPSxLc3ZffeRQ/AtKtcUl4PzmJEEPt965tNpWSE4vhDkoGFxRe0TPZ45xX8/3HbGsUl48aMdLlAu28MEDsQ=="
+  "resolved" "https://registry.npmjs.org/lottie-react-native/-/lottie-react-native-6.4.1.tgz"
+  "version" "6.4.1"
+
+"lottie-web@^5.7.1":
+  "integrity" "sha512-uvhvYPC8kGPjXT3MyKMrL3JitEAmDMp30lVkuq/590Mw9ok6pWcFCwXJveo0t5uqYw1UREQHofD+jVpdjBv8wg=="
+  "resolved" "https://registry.npmjs.org/lottie-web/-/lottie-web-5.12.2.tgz"
+  "version" "5.12.2"
+
 "lru-cache@^5.1.1":
   "integrity" "sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w=="
   "resolved" "https://registry.npmjs.org/lru-cache/-/lru-cache-5.1.1.tgz"
@@ -5730,6 +5740,13 @@
     "prop-types" "^15.6.2"
     "react-native-iphone-x-helper" "^1.0.3"
 
+"react-native-lottie@^0.0.1-alpha.2":
+  "integrity" "sha512-JAQ0xRuWxEi8TjyoAq6rutrcCJSa+CqfuxfIzmqrNP0FTYsDgeWCO67m5i9uMAahQrf1u/OkiLpOSI8r9yDAjw=="
+  "resolved" "https://registry.npmjs.org/react-native-lottie/-/react-native-lottie-0.0.1-alpha.2.tgz"
+  "version" "0.0.1-alpha.2"
+  dependencies:
+    "react-native-web-lottie" "^1.4.4"
+
 "react-native-reanimated@^3.5.4":
   "integrity" "sha512-F4vG9Yf9PKmE3GaWtVGUpzj3SM6YY2cx1yRHCwiMd1uY7W0gU017LfcVUorboJnj0y5QZqEriEK1Usq2Y8YZqg=="
   "resolved" "https://registry.npmjs.org/react-native-reanimated/-/react-native-reanimated-3.6.1.tgz"
@@ -5759,6 +5776,13 @@
   dependencies:
     "react-freeze" "^1.0.0"
     "warn-once" "^0.1.0"
+
+"react-native-web-lottie@^1.4.4":
+  "integrity" "sha512-W0jZiOf2u3Us6yASdpgAuL1+3Gw1EU/Wi5QAf6brzhXmJnq6/FMGCTf5zvSaX0yIurr9qcYB40DwAb4HwA6frg=="
+  "resolved" "https://registry.npmjs.org/react-native-web-lottie/-/react-native-web-lottie-1.4.4.tgz"
+  "version" "1.4.4"
+  dependencies:
+    "lottie-web" "^5.7.1"
 
 "react-native@0.72.7":
   "integrity" "sha512-dqVFojOO9rOvyFbbM3/v9/GJR355OSuBhEY4NQlMIRc2w0Xch5MT/2uPoq3+OvJ+5h7a8LFAco3fucSffG0FbA=="
