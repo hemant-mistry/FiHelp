@@ -20,6 +20,8 @@ import {
 import LottieView from "lottie-react-native";
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
+
+//Loading screen till data fetching
 const LoadingScreen = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "#000000" }}>
     <LottieView
@@ -37,14 +39,37 @@ const LoadingScreen = () => (
 
 
 const PastTransactions = () => {
+  //Initializing the navigation
   const navigation = useNavigation();
+  //Handling the loading states
   const [isLoading, setIsLoading] = useState(true);
+  //Handling the transaction details
   const [transactionDetails, setTransactionDetails] = useState([])
+
+  //Handling button clicks
   const handleNavButtonClick = (screenName) => {
     navigation.navigate(screenName);
   };
 
+  //Handling delete transaction interaction
+  const handleDeleteTransaction = async(transactionId) => {
+    try{
 
+      //Update the Firestore database to remove the transaction
+      await firebase.firestore().collection('Transaction').doc(transactionId).delete();
+
+      //Updating the local state to remove the deleted transactions
+      setTransactionDetails((prevTransactions)=>
+        prevTransactions.filter((transaction)=>transaction.id!==transactionId)
+      );
+
+    } catch(error){
+      console.error('Error deleting transaction:', error)
+      
+  }
+  }
+
+  
   useEffect(() => {
     const loadData = async () => {
       // Simulate loading data
@@ -59,16 +84,16 @@ const PastTransactions = () => {
  
 
   useFocusEffect(()=>{
-    console.log(transactionDetails);
-
     const fetchTransactionDetails = async () =>{
       try{
         const snapshot = await firebase.firestore().collection('Transaction').get();
         const data =  snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
         setTransactionDetails(data)
+        setIsLoading(false)
       }
       catch(error){
         console.error('Error fetching data from Firestore:',error)
+        setIsLoading(false)
       }
     }
 
@@ -76,7 +101,6 @@ const PastTransactions = () => {
   }, )
 
   if (isLoading) {
-    console.log("splash")
     return <LoadingScreen />;
   }
 
@@ -164,7 +188,7 @@ const PastTransactions = () => {
           />
         </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
+        <TouchableOpacity disabled>
         <View style={styles.NavLink}>
         
         <Image

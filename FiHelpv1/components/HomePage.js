@@ -3,16 +3,32 @@ import {View, Text, StyleSheet, Image, ImageBackground} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { firebase } from '@react-native-firebase/firestore';
+import PushNotification  from 'react-native-push-notification';
+import LottieView from "lottie-react-native";
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 const HomePage = () => {
   const navigation = useNavigation();
-  
+  const [loading, setLoading] = useState(true); // Track loading state
   const [percentage, setPrecentage] = useState(0);
-  // Calculate the dynamic width of the progress bar
-  const progressBarWidth = `${percentage}%`;
   const [availableBalance, setAvailableBalance] = useState('');
   const [budgetData, setBudgetData] = useState([]);
- 
+  const [progressBarColor, setProgressBarColor] = useState('#3AC586')
+
+  const LoadingScreen = () => (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "#000000" }}>
+      <LottieView
+      style={{
+        width:400,
+        height:400
+      }}
+        source={require('../assets/animations/FiHelpStartScreenAnimation.json')}
+        autoPlay
+        loop
+      />
+    </View>
+  );
+  
 
 
   const handleNavButtonClick = (screenName) => {
@@ -21,28 +37,54 @@ const HomePage = () => {
 
   const calPercentage = (budgetData, availableBalance) => {
     const percentage = ((availableBalance) / parseFloat(budgetData[0].BudgetAmount)) * 100;
-    setPrecentage(100-percentage); 
     
+    if (percentage<0){
+      setPrecentage(100)
+      setProgressBarColor('#F15A59')
+    }else{
+      setPrecentage(100-percentage); 
+      setProgressBarColor('#3AC586'); // Set default green color
+    }
+   
   }
 
-  
+  //Check notification permissions
+  const checkNotificationPermissions = async () =>{
+    
+    const results = await check(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
+    console.log(results)
+    if(results === RESULTS.DENIED){
+      const permissionRequestResult = await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS);
+      if(permissionRequestResult === RESULTS.GRANTED){
+        console.log("Notifications permissions granted");
+      }
+      else{
+        console.log("Notification permissions denied");
+      }
+    }
+  }
+
+  const showNotification = () =>{
+    PushNotification.localNotification({
+      channelId: '1',
+      title:'Budget Alert',
+      message:'Your budget has crossed 50%',
+    })
+  }
 
   const fetchTransactionData = async (budgetData) =>{
     try{
       const snapshot = await firebase.firestore().collection('Transaction').get();
       const data = snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
-
       //Extract the "Amount" values from the array and convert them to numbers
       const amounts = data.map((transaction)=>parseFloat(transaction.Amount) || 0);
-      
-
       //Sum of the total past transactions
       const totalAmount = amounts.reduce((sum,amount)=> sum+amount,0);
-
-      console.log("Budget",budgetData.BudgetAmount)
       setAvailableBalance(parseFloat(budgetData[0].BudgetAmount)-totalAmount)
+      setLoading(false); // Set loading to false once data is fetched
     }
     catch(error){
+      setLoading(false); // Set loading to false once data is fetched
       console.error('Error fetching Transaction data from Firestore:',error)
     }
   }
@@ -52,22 +94,28 @@ const HomePage = () => {
       const snapshot = await firebase.firestore().collection('Budget').get();
       const data =  snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
       setBudgetData(data);
-      console.log(data)
+     
       
       fetchTransactionData(data);
       calPercentage(data,availableBalance) 
+      setLoading(false); // Set loading to false once data is fetched
     } catch(error){
       console.error('Error fetching data from Firestore:',error)
+      setLoading(false); // Set loading to false once data is fetched
     }
   }
 
-
+  {/*useEffect(()=>{
+    checkNotificationPermissions();
+  },[])*/}
   
   useFocusEffect(()=>{    
     fetchData();
   },);
 
-
+  if (loading){
+    return <LoadingScreen />;
+  }
 
   return (
     <View style={styles.HomePageContainer}>
@@ -100,12 +148,15 @@ const HomePage = () => {
           <Text style={styles.BudgetBalAmount}>₹ {budgetData.length > 0 ? budgetData[0].BudgetAmount : ''}</Text>
           </View>
           <View style={styles.ProgressBarContainer}>
-            <View
-              style={[
-                styles.ProgressBar,
-                {width: progressBarWidth, backgroundColor: '#3AC586'}, // Set dynamic width and green color
-              ]}
-            />
+          <View
+    style={[
+      styles.ProgressBar,
+      {
+        width: `${percentage}%`,
+        backgroundColor: progressBarColor,
+      },
+    ]}
+  />
           </View>
         </View>
       </View>
@@ -157,7 +208,7 @@ const HomePage = () => {
           />
         </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
+        <TouchableOpacity disabled>
         <View style={styles.NavLink}>
         
         <Image
@@ -240,15 +291,17 @@ const styles = StyleSheet.create({
   },
   BudgetBalCard: {
     flexDirection: 'column', // Change to 'column' for vertical alignment
-    padding: 10,
+    paddingLeft:8,
+    paddingTop:10,
     backgroundColor: 'white',
     width: '70%',
-    borderRadius: 24,
+    borderRadius: 20,
     marginTop: 20,
+    overflow:'hidden',
   },
   BudgetBalHeader: {
     color: 'black',
-    fontSize: 13,
+    fontSize: 14,
     marginBottom: 10,
     fontWeight: 'bold',
   },
@@ -260,18 +313,20 @@ const styles = StyleSheet.create({
   },
   BudgetBalAmount: {
     color: 'black', // Change the color as needed
-    fontSize: 29,
+    fontSize: 25,
     fontWeight: 'bold',
     marginLeft: 45,
   },
   ProgressBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingRight:10,
+    paddingLeft:6
+    
   },
   ProgressBar: {
-    height: 10,
+    height: 8,
     borderRadius: 5,
-    marginRight: 10,
     marginBottom: 10,
     backgroundColor: '#e0e0e0',
   },
@@ -314,5 +369,6 @@ const styles = StyleSheet.create({
     height:24
   }
 });
+
 
 export default HomePage;

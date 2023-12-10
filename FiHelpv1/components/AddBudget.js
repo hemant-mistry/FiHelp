@@ -189,7 +189,7 @@ const AddBudget = () =>{
           />
         </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
+        <TouchableOpacity disabled>
         <View style={styles.NavLink}>
         
         <Image
