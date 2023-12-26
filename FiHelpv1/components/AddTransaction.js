@@ -133,7 +133,7 @@ const AddTransaction = () =>{
           />
         </View>
         </TouchableOpacity>
-        <TouchableOpacity disabled>
+        <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
         <View style={styles.NavLink}>
         
         <Image
@@ -266,7 +266,8 @@ const styles = StyleSheet.create({
     
   },
   NavLinkIcon:{
-    height:24
+    height:18,
+    width:18
   }
 });
 

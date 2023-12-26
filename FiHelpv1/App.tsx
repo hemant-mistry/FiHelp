@@ -10,6 +10,9 @@ import addTransaction from "./components/AddTransaction";
 import PastTransactions from "./components/PastTransactions";
 import AddBudget from "./components/AddBudget";
 import LottieView from "lottie-react-native";
+import UserProfile from "./components/UserProfile";
+import { getToken, notificationListener, requestUserPermission } from "./components/utils";
+
 
 const Stack = createStackNavigator();
 
@@ -32,6 +35,13 @@ const App = () => {
   StatusBar.setBarStyle("light-content");
   StatusBar.setBackgroundColor("black");
 
+
+  useEffect(()=>{
+    requestUserPermission();
+    notificationListener();
+    getToken();
+  }, []);
+  
   useEffect(() => {
     const loadData = async () => {
       // Simulate loading data
@@ -42,7 +52,7 @@ const App = () => {
 
     loadData();
   }, []);
-
+ 
   if (isLoading) {
     console.log("splash")
     return <LoadingScreen />;
@@ -52,7 +62,7 @@ const App = () => {
     <View style={{ flex: 1, backgroundColor: "#1E1E1E" }}>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="HomePage"
+          initialRouteName="UserProfile"
           screenOptions={{
             headerStyle: {
               backgroundColor: "#1E1E1E",
@@ -84,6 +94,11 @@ const App = () => {
             name="AddTransaction"
             component={addTransaction}
             options={{ headerTitle: "AddTransaction", headerShown: false }}
+          />
+          <Stack.Screen
+            name="UserProfile"
+            component={UserProfile}
+            options={{ headerTitle: "UserProfile", headerShown: false }}
           />
         </Stack.Navigator>
       </NavigationContainer>

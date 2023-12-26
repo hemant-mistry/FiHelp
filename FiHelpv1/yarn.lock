@@ -2103,6 +2103,11 @@
   "resolved" "https://registry.npmjs.org/@react-native-firebase/firestore/-/firestore-18.7.1.tgz"
   "version" "18.7.1"
 
+"@react-native-firebase/messaging@^18.7.3":
+  "integrity" "sha512-K2l8k9wif5mni85WP940uJjW3agnBqhgSTqtg7y+39EOnYJZ3WhIDpArHttTSbtTVB5OyJ8qLiOQm3gpkaKqPg=="
+  "resolved" "https://registry.npmjs.org/@react-native-firebase/messaging/-/messaging-18.7.3.tgz"
+  "version" "18.7.3"
+
 "@react-native/assets-registry@^0.72.0":
   "integrity" "sha512-Im93xRJuHHxb1wniGhBMsxLwcfzdYreSZVQGDoMJgkd6+Iky61LInGEHnQCTN0fKNYF1Dvcofb4uMmE1RQHXHQ=="
   "resolved" "https://registry.npmjs.org/@react-native/assets-registry/-/assets-registry-0.72.0.tgz"

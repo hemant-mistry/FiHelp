@@ -208,7 +208,7 @@ const HomePage = () => {
           />
         </View>
         </TouchableOpacity>
-        <TouchableOpacity disabled>
+        <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
         <View style={styles.NavLink}>
         
         <Image
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     color: 'black', // Change the color as needed
     fontSize: 25,
     fontWeight: 'bold',
-    marginLeft: 45,
+    marginLeft: '10%',
   },
   ProgressBarContainer: {
     flexDirection: 'row',
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   },
   
   addTransactionContainer: {
-    marginTop:"35%",
+    marginTop:"40%",
     alignItems: 'center', // Align components vertically
   },
   addTransaction: {
@@ -366,7 +366,8 @@ const styles = StyleSheet.create({
     
   },
   NavLinkIcon:{
-    height:24
+    height:18,
+    width:18
   }
 });
 
