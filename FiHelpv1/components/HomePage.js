@@ -15,6 +15,28 @@ const HomePage = () => {
   const [budgetData, setBudgetData] = useState([]);
   const [progressBarColor, setProgressBarColor] = useState('#3AC586')
 
+
+    // Get the current month
+    const currentMonth = new Date().getMonth() + 1;
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    const currentMonthName = monthNames[currentMonth - 1];
+  
+    console.log(currentMonthName);
+
+
   const LoadingScreen = () => (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "#000000" }}>
       <LottieView
@@ -74,7 +96,11 @@ const HomePage = () => {
 
   const fetchTransactionData = async (budgetData) =>{
     try{
-      const snapshot = await firebase.firestore().collection('Transaction').get();
+      const snapshot = await firebase
+      .firestore()
+      .collection('Transaction')
+      .where('Month', '==', currentMonthName)
+      .get();
       const data = snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
       //Extract the "Amount" values from the array and convert them to numbers
       const amounts = data.map((transaction)=>parseFloat(transaction.Amount) || 0);
