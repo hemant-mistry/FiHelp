@@ -12,7 +12,9 @@ import AddBudget from "./components/AddBudget";
 import LottieView from "lottie-react-native";
 import UserProfile from "./components/UserProfile";
 import { getToken, notificationListener, requestUserPermission } from "./components/utils";
-
+import SignUpPage from "./components/SignUpPage";
+import LoginPage from "./components/LoginPage";
+import auth from '@react-native-firebase/auth';
 
 const Stack = createStackNavigator();
 
@@ -32,6 +34,7 @@ const LoadingScreen = () => (
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [initialRoute, setInitialRoute] = useState('LoginPage'); // Set initial route to LoginPage by default
   StatusBar.setBarStyle("light-content");
   StatusBar.setBackgroundColor("black");
 
@@ -44,6 +47,13 @@ const App = () => {
   
   useEffect(() => {
     const loadData = async () => {
+      // Check if user is already logged in
+      const user = auth().currentUser;
+      if (user) {
+        // User is logged in, navigate to HomePage
+        setInitialRoute('HomePage');
+      }
+      
       // Simulate loading data
       setTimeout(() => {
         setIsLoading(false);
@@ -62,7 +72,7 @@ const App = () => {
     <View style={{ flex: 1, backgroundColor: "#1E1E1E" }}>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="UserProfile"
+          initialRouteName={initialRoute} // Set initial route dynamically
           screenOptions={{
             headerStyle: {
               backgroundColor: "#1E1E1E",
@@ -98,6 +108,16 @@ const App = () => {
           <Stack.Screen
             name="UserProfile"
             component={UserProfile}
+            options={{ headerTitle: "UserProfile", headerShown: false }}
+          />
+          <Stack.Screen
+            name="LoginPage"
+            component={LoginPage}
+            options={{ headerTitle: "UserProfile", headerShown: false }}
+          />
+          <Stack.Screen
+            name="SignUpPage"
+            component={SignUpPage}
             options={{ headerTitle: "UserProfile", headerShown: false }}
           />
         </Stack.Navigator>

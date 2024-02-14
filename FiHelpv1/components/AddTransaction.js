@@ -27,24 +27,30 @@ const AddTransaction = () =>{
 
   const [transactionDetail, setTransactionDetail] = useState('')
   const [amount, setAmount] = useState('')
+  const [month, setMonth] = useState('');
+  useEffect(() => {
+    // Get current month when the component mounts
+    const currentDate = new Date();
+    const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
+    setMonth(currentMonth);
+  }, []);
 
-  const setTransaction = () =>{
-    console.log("Entered the setTransaction function..")
-      const data = {
-          TransactionDetail: transactionDetail,
-          Amount:amount
-      };
+  const setTransaction = () => {
+    const data = {
+      TransactionDetail: transactionDetail,
+      Amount: amount,
+      Month: month, // Include the month in the data object
+    };
 
-      databaseConnection
+    databaseConnection
       .add(data)
-      .then(()=>{
+      .then(() => {
         setAmount('');
         setTransactionDetail('');
-      
         Keyboard.dismiss();
-    })
+      });
+  };
 
-  }
 
     return(
         <View style={styles.addTransationContainer}>

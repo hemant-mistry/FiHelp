@@ -9,14 +9,33 @@ import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 const UserProfile = () => {
   const navigation = useNavigation();
+  const [userEmail, setUserEmail] = useState('');
   const handleNavButtonClick = screenName => {
     navigation.navigate(screenName);
   };
+
+
+  //Fetch the user email of the logged in user from firebase 
+  useEffect(()=>{
+    const fetchUserEmail = async () =>{
+      const currentUser = firebase.auth().currentUser;
+      if (currentUser){
+        setUserEmail(currentUser.email)
+      }
+    };
+
+    fetchUserEmail();
+  },[]);
+
+
+
+
   return (
     <View style={styles.userProfileContainer}>
       <Text style={styles.userProfileText}>
-        You are logged in as: <Text style={styles.usernameSpan}>XXXXX</Text>
+        Hello! <Text style={styles.usernameSpan}> {userEmail}</Text>
       </Text>
+      <Text style={styles.userProfileSubText}> New features will be coming soon..</Text>
 
     {/* Add new transactions UI */}
       <TouchableOpacity onPress={() => handleNavButtonClick('AddTransaction')}>
@@ -80,7 +99,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userProfileText: {
-    marginTop: '75%',
+    marginTop: '70%',
     color: 'white',
   },
   usernameSpan: {
@@ -115,6 +134,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize:20
   },
+
+  userProfileSubText:{
+    color: 'white',
+    marginTop:5
+  }
 });
 
 export default UserProfile;
