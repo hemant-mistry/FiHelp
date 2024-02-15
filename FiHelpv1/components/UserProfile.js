@@ -14,36 +14,39 @@ const UserProfile = () => {
     navigation.navigate(screenName);
   };
 
-
-  //Fetch the user email of the logged in user from firebase 
-  useEffect(()=>{
-    const fetchUserEmail = async () =>{
+  //Fetch the user email of the logged in user from firebase
+  useEffect(() => {
+    const fetchUserEmail = async () => {
       const currentUser = firebase.auth().currentUser;
-      if (currentUser){
-        setUserEmail(currentUser.email)
+      if (currentUser) {
+        setUserEmail(currentUser.email);
       }
     };
 
     fetchUserEmail();
-  },[]);
-
-
-
+  }, []);
 
   return (
     <View style={styles.userProfileContainer}>
+      <Image
+        source={require('../assets/images/userprofile.png')} // Update the path to your image
+        style={styles.userProfileImage}
+      />
       <Text style={styles.userProfileText}>
         Hello! <Text style={styles.usernameSpan}> {userEmail}</Text>
       </Text>
-      <Text style={styles.userProfileSubText}> New features will be coming soon..</Text>
+      <Text style={styles.userProfileSubText}>
+        {' '}
+        New features will be coming soon..
+      </Text>
 
-    {/* Add new transactions UI */}
+      {/* Add new transactions UI */}
       <TouchableOpacity onPress={() => handleNavButtonClick('AddTransaction')}>
-      <View style={styles.addTransactionContainer}>
-      <View style={styles.addTransaction}>
-      <Text style={styles.addTransactionText}>+</Text>
-      </View>
-      </View>
+        <View style={styles.addTransactionContainer}>
+          <View style={styles.addTransaction}>
+            <Text style={styles.addTransactionText}>+</Text>
+          </View>
+        </View>
       </TouchableOpacity>
 
       {/*Footer navbar UI*/}
@@ -99,7 +102,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userProfileText: {
-    marginTop: '70%',
     color: 'white',
   },
   usernameSpan: {
@@ -119,25 +121,30 @@ const styles = StyleSheet.create({
     width: 18,
   },
   addTransactionContainer: {
-    marginTop:"645%",
+    marginTop: '550%',
     alignItems: 'center', // Align components vertically
   },
   addTransaction: {
-    backgroundColor: "#3AC586",
+    backgroundColor: '#3AC586',
     width: 48,
     height: 48,
     borderRadius: 40,
-    justifyContent:"center",
-    alignItems:"center"
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addTransactionText: {
-    color: "white",
-    fontSize:20
+    color: 'white',
+    fontSize: 20,
   },
 
-  userProfileSubText:{
+  userProfileSubText: {
     color: 'white',
-    marginTop:5
+    marginTop: 5,
+  },
+  userProfileImage:{
+    width:100,
+    height:100,
+    marginTop:"55%"
   }
 });
 
