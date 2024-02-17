@@ -14,73 +14,88 @@ import {
   Image,
   ImageBackground,
   TextInput,
-  Keyboard
+  Keyboard,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 import {firebase} from '@react-native-firebase/firestore';
-import { keyboard } from '@testing-library/user-event/dist/keyboard';
-const AddBudget = () =>{
-  const databaseConnection = firebase.firestore().collection('Budget')
+import {keyboard} from '@testing-library/user-event/dist/keyboard';
+const AddBudget = () => {
+  const databaseConnection = firebase.firestore().collection('Budget');
   const [month, setMonth] = useState('');
-  const [budgetamount, setBudgetamount] = useState('')
-
+  const [budgetamount, setBudgetamount] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   //State to keep track of whether the budget amount is fetched
   const [budgetFetched, setBudgetFetched] = useState(false);
 
   const navigation = useNavigation();
 
-  const handleNavButtonClick = (screenName) => {
+  const handleNavButtonClick = screenName => {
     navigation.navigate(screenName);
   };
 
-  const setMonthlyBudget = () =>{
-    console.log("Inside the setMonthlyBudget function");
+  
+  //Fetch the user email of the logged in user from firebase
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      const currentUser = firebase.auth().currentUser;
+      if (currentUser) {
+        setUserEmail(currentUser.email);
+      }
+    };
+
+    fetchUserEmail();
+  }, []);
+
+  const setMonthlyBudget = () => {
+    console.log('Inside the setMonthlyBudget function');
     const data = {
       BudgetAmount: budgetamount,
-      Month:month,
+      Month: month,
+      useremail: userEmail,
     };
 
     // Check if a budget entry for the current month already exists
-  databaseConnection
-  .where('Month', '==', month)
-  .get()
-  .then((querySnapshot) => {
-    if (querySnapshot.size > 0) {
-      // Update the existing entry
-      querySnapshot.forEach((doc) => {
-        databaseConnection.doc(doc.id).update(data);
+    databaseConnection
+      .where('Month', '==', month)
+      .where('useremail', '==', userEmail)
+      .get()
+      .then(querySnapshot => {
+        if (querySnapshot.size > 0) {
+          // Update the existing entry
+          querySnapshot.forEach(doc => {
+            databaseConnection.doc(doc.id).update(data);
+          });
+        } else {
+          // Add a new entry
+          databaseConnection.add(data);
+        }
+
+        Keyboard.dismiss();
+      })
+      .catch(error => {
+        console.error('Error checking/updating budget:', error);
       });
-    } else {
-      // Add a new entry
-      databaseConnection.add(data);
-    }
+  };
 
-    
-    
-    Keyboard.dismiss();
-  })
-  .catch((error) => {
-    console.error("Error checking/updating budget:", error);
-  });
-};
-
-   // New useEffect hook to set the default month
-   useEffect(() => {
+  // New useEffect hook to set the default month
+  useEffect(() => {
     const currentDate = new Date();
-    const defaultMonth = currentDate.toLocaleString('default', { month: 'long' });
+    const defaultMonth = currentDate.toLocaleString('default', {month: 'long'});
     setMonth(defaultMonth);
   }, []); // Empty dependency array ensures that this effect runs only once, similar to componentDidMount
-
 
   //For fetching the existing data from the database
   useEffect(() => {
     // Fetch existing budget amount when the component mounts
     const fetchBudgetAmount = async () => {
       try {
-        const snapshot = await databaseConnection.where('Month', '==', month).get();
+        const snapshot = await databaseConnection
+          .where('Month', '==', month)
+          .where('useremail','==',userEmail)
+          .get();
 
         if (snapshot.size > 0) {
-          snapshot.forEach((doc) => {
+          snapshot.forEach(doc => {
             const data = doc.data();
             setBudgetamount(data.BudgetAmount);
           });
@@ -97,13 +112,9 @@ const AddBudget = () =>{
     fetchBudgetAmount();
   }, [month]); // Fetch the budget amount whenever the month changes
 
-
-
-    return(
-        <View style={styles.addTransationContainer}>
-        
-        
-        <View style={styles.HeadingContainer}>
+  return (
+    <View style={styles.addTransationContainer}>
+      <View style={styles.HeadingContainer}>
         <View style={styles.AppTitle}>
           <Image
             source={require('../assets/images/FiHelpAppLogo.png')} // Update the path to your image
@@ -113,99 +124,93 @@ const AddBudget = () =>{
         </View>
       </View>
       <Text style={styles.AppSubtitle}>Set your Budget</Text>
-<View style={styles.AddTransactionsContainer}>
-      <View style={styles.AddTransactionForm}>
-        <View style={styles.AddTransactionDetail}>
+      <View style={styles.AddTransactionsContainer}>
+        <View style={styles.AddTransactionForm}>
+          <View style={styles.AddTransactionDetail}>
             <Text style={styles.DetailText}>Enter your Budget month:</Text>
             <TextInput
-                style={styles.inputTransactionDetail}
-                placeholder="Enter your budget month"
-                keyboardType="default"
-                onChangeText={text=>setMonth(text)}
-                value={month}
-                editable={false}
-                defaultValue={month}
-              />
+              style={styles.inputTransactionDetail}
+              placeholder="Enter your budget month"
+              keyboardType="default"
+              onChangeText={text => setMonth(text)}
+              value={month}
+              editable={false}
+              defaultValue={month}
+            />
+          </View>
+          <View style={styles.AddTransactionAmount}>
+            <Text style={styles.AmountText}>Budget Amount:</Text>
+            <TextInput
+              style={styles.inputTransactionAmount}
+              placeholder="Enter budget amount"
+              keyboardType="default"
+              onChangeText={text => setBudgetamount(text)}
+              value={budgetamount}
+              editable={budgetFetched} //Allow editing only if the budget amount is fetched
+            />
+          </View>
+          <Pressable style={styles.submitButton} onPress={setMonthlyBudget}>
+            <Text style={styles.submitButtonText}>Submit</Text>
+          </Pressable>
         </View>
-        <View style={styles.AddTransactionAmount}>
-        <Text style={styles.AmountText}>Budget Amount:</Text>
-        <TextInput
-                style={styles.inputTransactionAmount}
-                placeholder="Enter budget amount"
-                keyboardType="default"
-                onChangeText={text =>setBudgetamount(text)}
-                value={budgetamount}
-                editable={budgetFetched} //Allow editing only if the budget amount is fetched
-              />
+      </View>
+      {/*Footer navbar UI*/}
+      {/* Add new transactions UI */}
+      <TouchableOpacity onPress={() => handleNavButtonClick('AddTransaction')}>
+        <View style={styles.addTransactionContainer}>
+          <View style={styles.addTransaction}>
+            <Text style={styles.addTransactionText}>+</Text>
+          </View>
         </View>
-        <Pressable style={styles.submitButton} onPress={setMonthlyBudget}>
-              <Text style={styles.submitButtonText}>Submit</Text>
-            </Pressable>
-      </View>
-      </View>
-  {/*Footer navbar UI*/}
-    {/* Add new transactions UI */}
-    <TouchableOpacity onPress={() => handleNavButtonClick('AddTransaction')}>
-      <View style={styles.addTransactionContainer}>
-      <View style={styles.addTransaction}>
-      <Text style={styles.addTransactionText}>+</Text>
-      </View>
-      </View>
       </TouchableOpacity>
 
-      <ImageBackground    
+      <ImageBackground
         source={require('../assets/images/Navbar.png')} // Update the path to your image
         style={styles.footerNavbar}
         resizeMode="cover" // You can change the resizeMode as needed
       >
-
-      <TouchableOpacity onPress={() => handleNavButtonClick('HomePage')}>
-        <View style={styles.NavLink}>
-        
-        <Image
-            source={require('../assets/images/HomeIconInActive.png')} // Update the path to your image
-            style={styles.NavLinkIcon}
-          />
-        </View>
-        </TouchableOpacity>
-        
-        <TouchableOpacity onPress={() => handleNavButtonClick('PastTransactions')}>
-        <View style={styles.NavLink}>
-        
-        <Image
-            source={require('../assets/images/AnalysisInActive.png')} // Update the path to your image
-            style={styles.NavLinkIcon}
-          />
-        </View>
+        <TouchableOpacity onPress={() => handleNavButtonClick('HomePage')}>
+          <View style={styles.NavLink}>
+            <Image
+              source={require('../assets/images/HomeIconInActive.png')} // Update the path to your image
+              style={styles.NavLinkIcon}
+            />
+          </View>
         </TouchableOpacity>
 
-        
+        <TouchableOpacity
+          onPress={() => handleNavButtonClick('PastTransactions')}>
+          <View style={styles.NavLink}>
+            <Image
+              source={require('../assets/images/AnalysisInActive.png')} // Update the path to your image
+              style={styles.NavLinkIcon}
+            />
+          </View>
+        </TouchableOpacity>
+
         <TouchableOpacity onPress={() => handleNavButtonClick('AddBudget')}>
-        <View style={styles.NavLink}>
-        
-        <Image
-            source={require('../assets/images/WalletActive.png')} // Update the path to your image
-            style={styles.NavLinkIcon}
-          />
-        </View>
+          <View style={styles.NavLink}>
+            <Image
+              source={require('../assets/images/WalletActive.png')} // Update the path to your image
+              style={styles.NavLinkIcon}
+            />
+          </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => handleNavButtonClick('UserProfile')}>
-        <View style={styles.NavLink}>
-        
-        <Image
-            source={require('../assets/images/UserProfileInActive.png')} // Update the path to your image
-            style={styles.NavLinkIcon}
-          />
-        </View>
+          <View style={styles.NavLink}>
+            <Image
+              source={require('../assets/images/UserProfileInActive.png')} // Update the path to your image
+              style={styles.NavLinkIcon}
+            />
+          </View>
         </TouchableOpacity>
-
-    </ImageBackground>
-      </View>
-    );
-}
+      </ImageBackground>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    addTransationContainer: {
+  addTransationContainer: {
     backgroundColor: 'black',
     flex: 1,
   },
@@ -213,7 +218,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     alignItems: 'center', // Center content horizontally
   },
-  
+
   AppTitle: {
     flexDirection: 'row', // Arrange children in a row (horizontal)
     alignItems: 'center', // Align items in the center vertically
@@ -229,7 +234,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'InterDisplay-SemiBoldItalic',
   },
-  AppSubtitle:{
+  AppSubtitle: {
     color: 'white',
     fontSize: 24,
     textAlign: 'left',
@@ -237,27 +242,27 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontWeight: 'bold',
   },
-  AddTransactionForm:{
-    backgroundColor:"#121212",
-    padding:20,
-    borderRadius:24,
-    width:"80%"
+  AddTransactionForm: {
+    backgroundColor: '#121212',
+    padding: 20,
+    borderRadius: 24,
+    width: '80%',
   },
   addTransactionContainer: {
-    marginTop:"45%",
+    marginTop: '45%',
     alignItems: 'center', // Align components vertically
   },
   addTransaction: {
-    backgroundColor: "#3AC586",
+    backgroundColor: '#3AC586',
     width: 48,
     height: 48,
     borderRadius: 40,
-    justifyContent:"center",
-    alignItems:"center"
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addTransactionText: {
-    color: "white",
-    fontSize:20
+    color: 'white',
+    fontSize: 20,
   },
   inputTransactionAmount: {
     height: 40,
@@ -268,7 +273,6 @@ const styles = StyleSheet.create({
     borderColor: '#282829',
     backgroundColor: '#282829',
     borderRadius: 14,
-    
   },
   inputTransactionDetail: {
     height: 70,
@@ -279,22 +283,21 @@ const styles = StyleSheet.create({
     borderColor: '#282829',
     backgroundColor: '#282829',
     borderRadius: 14,
-    
   },
-  DetailText:{
-    color:"white",
-    fontSize:15,
-    marginBottom:5
+  DetailText: {
+    color: 'white',
+    fontSize: 15,
+    marginBottom: 5,
   },
-  AmountText:{
-    color:"white",
-    fontSize:15,
-    marginBottom:5
+  AmountText: {
+    color: 'white',
+    fontSize: 15,
+    marginBottom: 5,
   },
-  AddTransactionsContainer:{
-    justifyContent:"center",
-    alignItems:"center",
-    marginTop:70
+  AddTransactionsContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 70,
   },
   submitButton: {
     backgroundColor: '#3AC586',
@@ -311,21 +314,19 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontWeight: 'bold',
   },
-  footerNavbar:{
-    padding:20,
-    flexDirection:"row",
-    justifyContent:"space-between",
-    position:'absolute',
-    bottom:0,
-    left:0,
-    right:0,
-    
+  footerNavbar: {
+    padding: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
-  NavLinkIcon:{
-    height:18,
-    width:18
-  }
+  NavLinkIcon: {
+    height: 18,
+    width: 18,
+  },
 });
-
 
 export default AddBudget;
