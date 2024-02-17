@@ -81,7 +81,7 @@ const SignUpPage = ({}) => {
           <Text style={styles.submitButtonText}>Sign Up</Text>
         </Pressable>
         <Pressable onPress={()=>{
-           navigation.navigate('Login');
+           navigation.navigate('LoginPage');
         }}>
           <Text style={styles.clickheretext}>
             Already have an account? Click here to login
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   maincontainer: {
     flex: 1,
     backgroundColor: '#000000',
-    paddingTop: 10,
+    paddingTop: 100,
   },
   maintitle: {
     color: 'white',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   submitButton: {
-    backgroundColor: '#7289DA',
+    backgroundColor: '#3AC586',
     height: 28,
     width: 77,
     textAlign: 'center',

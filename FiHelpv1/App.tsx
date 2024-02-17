@@ -113,12 +113,12 @@ const App = () => {
           <Stack.Screen
             name="LoginPage"
             component={LoginPage}
-            options={{ headerTitle: "UserProfile", headerShown: false }}
+            options={{ headerTitle: "LoginPage", headerShown: false }}
           />
           <Stack.Screen
             name="SignUpPage"
             component={SignUpPage}
-            options={{ headerTitle: "UserProfile", headerShown: false }}
+            options={{ headerTitle: "SignUpPage", headerShown: false }}
           />
         </Stack.Navigator>
       </NavigationContainer>

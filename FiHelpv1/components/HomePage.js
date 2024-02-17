@@ -11,11 +11,11 @@ const HomePage = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true); // Track loading state
   const [percentage, setPrecentage] = useState(0);
-  const [availableBalance, setAvailableBalance] = useState('');
+  const [availableBalance, setAvailableBalance] = useState(0);
   const [budgetData, setBudgetData] = useState([]);
   const [progressBarColor, setProgressBarColor] = useState('#3AC586')
-
-
+  const [userEmail, setUserEmail] = useState('');
+  
     // Get the current month
     const currentMonth = new Date().getMonth() + 1;
     const monthNames = [
@@ -33,8 +33,7 @@ const HomePage = () => {
       'December',
     ];
     const currentMonthName = monthNames[currentMonth - 1];
-  
-    console.log(currentMonthName);
+
 
 
   const LoadingScreen = () => (
@@ -94,47 +93,69 @@ const HomePage = () => {
     })
   }
 
-  const fetchTransactionData = async (budgetData) =>{
-    try{
-      const snapshot = await firebase
-      .firestore()
-      .collection('Transaction')
-      .where('Month', '==', currentMonthName)
-      .get();
-      const data = snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
-      //Extract the "Amount" values from the array and convert them to numbers
-      const amounts = data.map((transaction)=>parseFloat(transaction.Amount) || 0);
-      //Sum of the total past transactions
-      const totalAmount = amounts.reduce((sum,amount)=> sum+amount,0);
-      setAvailableBalance(parseFloat(budgetData[0].BudgetAmount)-totalAmount)
-      setLoading(false); // Set loading to false once data is fetched
+  const fetchTransactionData = async (budgetData) => {
+    try {
+        const snapshot = await firebase
+            .firestore()
+            .collection('Transaction')
+            .where('Month', '==', currentMonthName)
+            .where('useremail', '==', userEmail) // Filter transactions by user email
+            .get();
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        // Extract the "Amount" values from the array and convert them to numbers
+        const amounts = data.map((transaction) => parseFloat(transaction.Amount) || 0);
+        // Sum of the total past transactions
+        const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0);
+        setAvailableBalance(parseFloat(budgetData[0].BudgetAmount) - totalAmount);
+        setLoading(false); // Set loading to false once data is fetched
+    } catch (error) {
+        setLoading(false); // Set loading to false once data is fetched
+        console.error('Error fetching Transaction data from Firestore:', error);
     }
-    catch(error){
-      setLoading(false); // Set loading to false once data is fetched
-      console.error('Error fetching Transaction data from Firestore:',error)
+};
+
+const fetchData = async () => {
+    try {
+        const snapshot = await firebase.firestore().collection('Budget').where('useremail', '==', userEmail).get(); // Filter budget data by user email
+        const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+        // Check if the user has set a budget or not
+        if (data.length > 0) {
+            setBudgetData(data);
+            fetchTransactionData(data);
+            calPercentage(data, availableBalance);
+        } else {
+            // If no budget is set, set availableBalance to 0
+            setBudgetData([]);
+            setAvailableBalance(0);
+            setPrecentage(0); // Corrected typo here
+            setProgressBarColor('#3AC586');
+        }
+        setLoading(false); // Set loading to false once data is fetched
+    } catch (error) {
+        console.error('Error fetching data from Firestore:', error);
+        setLoading(false); // Set loading to false once data is fetched
     }
-  }
-  const fetchData = async () =>{
-      
-    try{
-      const snapshot = await firebase.firestore().collection('Budget').get();
-      const data =  snapshot.docs.map((doc)=>({id:doc.id,...doc.data()}));
-      setBudgetData(data);
-     
-      
-      fetchTransactionData(data);
-      calPercentage(data,availableBalance) 
-      setLoading(false); // Set loading to false once data is fetched
-    } catch(error){
-      console.error('Error fetching data from Firestore:',error)
-      setLoading(false); // Set loading to false once data is fetched
-    }
-  }
+};
+
+
 
   {/*useEffect(()=>{
     checkNotificationPermissions();
   },[])*/}
   
+//Fetch the user email of the logged in user from firebase
+useEffect(() => {
+  const fetchUserEmail = async () => {
+    const currentUser = firebase.auth().currentUser;
+    if (currentUser) {
+      setUserEmail(currentUser.email);
+    }
+  };
+
+  fetchUserEmail();
+}, []);
+
   useFocusEffect(()=>{    
     fetchData();
   },);

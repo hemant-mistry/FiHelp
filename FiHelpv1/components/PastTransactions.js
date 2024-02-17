@@ -53,6 +53,7 @@ const PastTransactions = () => {
   //Handling the transaction details
   const [transactionDetails, setTransactionDetails] = useState([]);
 
+  const [userEmail, setUserEmail] = useState('');
   // Get the current month
   const currentMonth = new Date().getMonth() + 1;
   const monthNames = [
@@ -110,6 +111,18 @@ const PastTransactions = () => {
     loadData();
   }, []);
 
+  //Fetch the user email of the logged in user from firebase
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      const currentUser = firebase.auth().currentUser;
+      if (currentUser) {
+        setUserEmail(currentUser.email);
+      }
+    };
+
+    fetchUserEmail();
+  }, []);
+
   useFocusEffect(() => {
     const fetchTransactionDetails = async () => {
       try {
@@ -117,6 +130,7 @@ const PastTransactions = () => {
           .firestore()
           .collection('Transaction')
           .where('Month', '==', currentMonthName)
+          .where('useremail', '==', userEmail)
           .get();
         const data = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
         setTransactionDetails(data);

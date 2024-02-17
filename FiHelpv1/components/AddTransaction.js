@@ -28,6 +28,7 @@ const AddTransaction = () =>{
   const [transactionDetail, setTransactionDetail] = useState('')
   const [amount, setAmount] = useState('')
   const [month, setMonth] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   useEffect(() => {
     // Get current month when the component mounts
     const currentDate = new Date();
@@ -40,6 +41,7 @@ const AddTransaction = () =>{
       TransactionDetail: transactionDetail,
       Amount: amount,
       Month: month, // Include the month in the data object
+      useremail: userEmail
     };
 
     databaseConnection
@@ -51,6 +53,17 @@ const AddTransaction = () =>{
       });
   };
 
+  //Fetch the user email of the logged in user from firebase
+useEffect(() => {
+  const fetchUserEmail = async () => {
+    const currentUser = firebase.auth().currentUser;
+    if (currentUser) {
+      setUserEmail(currentUser.email);
+    }
+  };
+
+  fetchUserEmail();
+}, []);
 
     return(
         <View style={styles.addTransationContainer}>
